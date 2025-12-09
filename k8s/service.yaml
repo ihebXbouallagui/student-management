@@ -10,4 +10,4 @@ spec:
   ports:
     - port: 8080         # port interne du service
       targetPort: 8080   # port du container
-      nodePort: 30080    # port exposé sur le noeud
+      nodePort: 30081    # port exposé sur le noeud
