@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: devops
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: student-management-secret
+  namespace: devops
+type: Opaque
+data:
+  SPRING_DATASOURCE_USERNAME: dXNlcg==        # user
+  SPRING_DATASOURCE_PASSWORD: cGFzc3dvcmQ=    # passw0rd
+  SPRING_DATASOURCE_URL: bXlzcWw6Ly9teXNxbC1zZXJ2aWNlLmRldm9wczo1NDMyL215ZGJuYW1l  # mysql://mysql-service.devops:5432/nomdb
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: student-management-config
+  namespace: devops
+data:
+  SPRING_PROFILES_ACTIVE: "dev"
+  APP_NAME: "student-management"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student-management-deployment
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: student-management
+  template:
+    metadata:
+      labels:
+        app: student-management
+    spec:
+      containers:
+      - name: student-management
+        image: iheb1bouallagui/student-management:20251209-123945
+        ports:
+        - containerPort: 8080
+        envFrom:
+          - secretRef:
+              name: student-management-secret
+          - configMapRef:
+              name: student-management-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: student-management-service
+  namespace: devops
+spec:
+  type: NodePort
+  selector:
+    app: student-management
+  ports:
+    - port: 8080         # port interne du service
+      targetPort: 8080   # port du container
+      nodePort: 8080     # port exposé sur le noeud
